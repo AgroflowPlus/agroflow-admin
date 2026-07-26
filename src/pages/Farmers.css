@@ -1,0 +1,434 @@
+.farmers-page {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  animation: fadeUp 0.4s var(--ease-out) both;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.page-title {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--clr-text);
+  letter-spacing: -0.5px;
+}
+
+.page-subtitle {
+  font-size: 13.5px;
+  color: var(--clr-text-muted);
+  margin-top: 3px;
+  font-weight: 400;
+}
+
+.farmers-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Table Wrapper */
+.farmers-table-wrap {
+  background: var(--clr-surface);
+  border: 1px solid var(--clr-border);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  box-shadow: var(--sh-xs);
+}
+
+.farmers-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.farmers-table thead {
+  background: var(--clr-surface-2);
+  border-bottom: 1px solid var(--clr-border);
+}
+
+.farmers-table th {
+  padding: 13px 16px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--clr-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  transition: color 0.15s;
+}
+
+.farmers-table th:hover {
+  color: var(--clr-text);
+}
+
+.farmers-table td {
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--clr-surface-2);
+  color: var(--clr-text-soft);
+  vertical-align: middle;
+}
+
+.farmers-table tr:last-child td {
+  border-bottom: none;
+}
+
+.farmers-row {
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.farmers-row:hover td {
+  background: var(--clr-lime-bg);
+}
+
+/* Sort icons */
+.sort-icon { font-size: 11px; margin-left: 4px; }
+.sort-icon.inactive { color: var(--clr-text-light); }
+.sort-icon.active   { color: var(--clr-fern); font-weight: 700; }
+
+/* Farmer name cell */
+.farmer-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.farmer-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--clr-lime-bg);
+  border: 1.5px solid var(--clr-lime-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--clr-fern);
+  flex-shrink: 0;
+}
+
+.farmer-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--clr-text);
+}
+
+.farmer-id {
+  font-size: 11.5px;
+  color: var(--clr-text-muted);
+  margin-top: 1px;
+}
+
+/* Cell helpers */
+.cell-with-icon {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.cell-icon { color: var(--clr-text-muted); flex-shrink: 0; }
+
+.cell-num {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--clr-text);
+  text-align: center;
+}
+
+/* NDVI pill */
+.ndvi-pill {
+  display: inline-block;
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--r-full);
+}
+
+.ndvi-pill.good { background: var(--clr-success-bg); color: var(--clr-success-text); }
+.ndvi-pill.mid  { background: var(--clr-warning-bg); color: var(--clr-warning-text); }
+.ndvi-pill.low  { background: var(--clr-danger-bg);  color: var(--clr-danger-text);  }
+
+/* View button */
+.view-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--clr-fern);
+  background: var(--clr-lime-bg);
+  border: 1px solid var(--clr-lime-border);
+  border-radius: var(--r-md);
+  padding: 6px 12px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.view-btn:hover {
+  background: var(--clr-lime-border);
+  color: var(--clr-forest);
+}
+
+/* Empty state */
+.farmers-empty {
+  text-align: center;
+  padding: 60px 20px !important;
+  color: var(--clr-text-muted);
+}
+
+.farmers-empty p {
+  margin-top: 10px;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+/* ── Drawer Detail Styles ───────────────────── */
+.farmer-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.farmer-detail-profile {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.farmer-detail-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--clr-lime-bg);
+  border: 2px solid var(--clr-lime-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--clr-fern);
+  flex-shrink: 0;
+}
+
+.farmer-detail-name {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--clr-text);
+  margin-bottom: 3px;
+}
+
+.farmer-detail-id {
+  font-size: 12px;
+  color: var(--clr-text-muted);
+  margin-bottom: 7px;
+}
+
+.farmer-detail-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.fd-stat {
+  background: var(--clr-surface-2);
+  border-radius: var(--r-md);
+  padding: 14px 12px;
+  text-align: center;
+}
+
+.fd-stat-icon {
+  color: var(--clr-fern);
+  margin: 0 auto 6px;
+}
+
+.fd-stat-val {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--clr-text);
+}
+
+.fd-stat-label {
+  font-size: 11.5px;
+  color: var(--clr-text-muted);
+  margin-top: 2px;
+}
+
+.farmer-detail-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fd-section-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--clr-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.fd-info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 1px solid var(--clr-border);
+  border-radius: var(--r-md);
+  overflow: hidden;
+}
+
+.fd-info-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--clr-border);
+}
+
+.fd-info-row:last-child { border-bottom: none; }
+
+.fd-info-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--clr-text-muted);
+}
+
+.fd-info-val {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--clr-text);
+}
+
+/* NDVI health bar */
+.fd-ndvi-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.fd-ndvi-bar-bg {
+  flex: 1;
+  height: 10px;
+  background: var(--clr-surface-2);
+  border-radius: var(--r-full);
+  overflow: hidden;
+}
+
+.fd-ndvi-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--clr-lime-dark), var(--clr-lime));
+  border-radius: var(--r-full);
+  transition: width 0.5s var(--ease-out);
+}
+
+.fd-ndvi-val {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--clr-fern);
+  width: 38px;
+  text-align: right;
+}
+
+.fd-ndvi-note {
+  font-size: 13px;
+  color: var(--clr-text-muted);
+  font-style: italic;
+}
+
+/* Action buttons */
+.fd-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fd-btn {
+  width: 100%;
+  height: 42px;
+  border-radius: var(--r-md);
+  font-size: 14px;
+  font-weight: 600;
+  transition: opacity 0.15s, transform 0.15s;
+}
+
+.fd-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+.fd-btn:active { transform: scale(0.98); }
+
+.fd-btn.primary {
+  background: var(--clr-fern);
+  color: white;
+  border: none;
+}
+
+.fd-btn.secondary {
+  background: var(--clr-lime-bg);
+  color: var(--clr-fern);
+  border: 1px solid var(--clr-lime-border);
+}
+
+.fd-btn.danger {
+  background: var(--clr-danger-bg);
+  color: var(--clr-danger-text);
+  border: 1px solid rgba(192, 57, 43, 0.2);
+}
+
+
+
+
+@media (max-width: 768px) {
+  .farmers-toolbar {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  /* Search takes full width */
+  .farmers-toolbar .search-bar {
+    width: 100%;
+  }
+
+  /* Filters row scrolls horizontally */
+  .farmers-toolbar .filter-bar {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 8px;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .farmers-toolbar .filter-bar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .farmers-toolbar .filter-select {
+    flex-shrink: 0;
+    min-width: 120px;
+    width: auto;
+  }
+
+  /* Table scrolls horizontally */
+  .farmers-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .farmers-table {
+    min-width: 700px;
+  }
+}
