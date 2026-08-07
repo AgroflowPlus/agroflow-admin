@@ -169,3 +169,15 @@ export const contentAPI = {
     })
   },
 }
+
+export const adminAPI = {
+  getStats:      () => apiFetch('/admin/stats'),
+  getListings:   () => apiFetch('/admin/listings'),
+  deleteListing: (id: string) => apiFetch(`/admin/listings/${id}`, { method: 'DELETE' }),
+  getOrders:     () => apiFetch('/admin/orders'),
+  broadcast:     (title: string, body: string, url?: string) =>
+    apiFetch('/push/broadcast', {
+      method: 'POST',
+      body:   JSON.stringify({ title, body, url }),
+    }),
+}

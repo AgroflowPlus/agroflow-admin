@@ -1,12 +1,12 @@
 import { NavLink } from 'react-router-dom'
-import { MdDashboard, MdPeople, MdWarning, MdSettings } from 'react-icons/md'
+import { MdDashboard, MdVerifiedUser, MdManageAccounts, MdSettings } from 'react-icons/md'
 import './BottomNav.css'
 
 const items = [
-  { to: '/dashboard', icon: <MdDashboard size={22} />, label: 'Home'     },
-  { to: '/farmers',   icon: <MdPeople     size={22} />, label: 'Farmers'  },
-  { to: '/alerts',    icon: <MdWarning    size={22} />, label: 'Alerts'   },
-  { to: '/settings',  icon: <MdSettings   size={22} />, label: 'Settings' },
+  { to: '/dashboard', icon: <MdDashboard size={22} />, label: 'Home' },
+  { to: '/verification', icon: <MdVerifiedUser size={22} />, label: 'Verify' },
+  { to: '/users', icon: <MdManageAccounts size={22} />, label: 'Users' },
+  { to: '/settings', icon: <MdSettings size={22} />, label: 'Settings' },
 ]
 
 export default function BottomNav() {

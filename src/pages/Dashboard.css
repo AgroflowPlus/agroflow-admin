@@ -30,6 +30,11 @@
   border-radius: var(--r-lg);
   padding: 20px;
   box-shadow: var(--sh-xs);
+  transition: box-shadow 0.2s;
+}
+
+.dash-card:hover {
+  box-shadow: var(--sh-sm, 0 4px 14px rgba(0,0,0,0.06));
 }
 
 .dash-card-title {
@@ -52,7 +57,7 @@
 
 .dash-table th {
   text-align: left;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   color: var(--clr-text-muted);
   padding: 0 10px 10px 0;
@@ -120,11 +125,18 @@
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  padding: 11px 0;
+  padding: 11px 6px;
+  margin: 0 -6px;
   border-bottom: 1px solid var(--clr-surface-2);
+  border-radius: 6px;
+  transition: background 0.15s;
 }
 
 .alert-item:last-child { border-bottom: none; }
+
+.alert-item:hover {
+  background: var(--clr-surface-2);
+}
 
 .alert-dot {
   width: 9px;
@@ -188,10 +200,7 @@
   }
 }
 
-
-
-
-
+/* ── FARMER LIST ── */
 .dash-farmer-list { display: none; }
 
 .dash-farmer-row {

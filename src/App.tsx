@@ -17,6 +17,8 @@ import Alerts    from "./pages/Alerts";
 import Users     from "./pages/Users";
 import Content   from "./pages/Content";
 import Settings  from "./pages/Settings";
+import SellerVerification from "./pages/SellerVerification";
+import { ToastProvider } from "./context/ToastContext"; // ← ADD THIS
 import Login     from "./pages/Login";
 import { getToken, getUser } from "./services/api";
 import "./styles/global.css";
@@ -29,10 +31,12 @@ const pageTitles: Record<string, string> = {
   "/users":     "Users",
   "/content":   "Content Manager",
   "/settings":  "Settings",
+  "/verification": "Seller Verification",
 };
 
 // ── Auth guard ────────────────────────────────────
 function RequireAuth({ children }: { children: React.ReactNode }) {
+  // ── TEMPORARILY COMMENTED OUT: Bypass auth check ──
   const token = getToken()
   const user  = getUser()
 
@@ -109,6 +113,7 @@ function Layout() {
             <Route path="/content"   element={<Content />}   />
             <Route path="/users"     element={<Users />}     />
             <Route path="/settings"  element={<Settings />}  />
+            <Route path="/verification" element={<SellerVerification />} />
             <Route path="*"          element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </main>
@@ -121,21 +126,23 @@ function Layout() {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* Public route */}
-        <Route path="/login" element={<Login />} />
+    <ToastProvider> {/* ← ADD THIS WRAPPER */}
+      <BrowserRouter>
+        <Routes>
+          
+          <Route path="/login" element={<Login />} /> 
 
-        {/* All dashboard routes protected */}
-        <Route
-          path="/*"
-          element={
-            <RequireAuth>
-              <Layout />
-            </RequireAuth>
-          }
-        />
-      </Routes>
-    </BrowserRouter>
+          {/* All dashboard routes - auth bypassed */}
+          <Route
+            path="/*"
+            element={
+              <RequireAuth>
+                <Layout />
+              </RequireAuth>
+            }
+          />
+        </Routes>
+      </BrowserRouter>
+    </ToastProvider> 
   );
 }
