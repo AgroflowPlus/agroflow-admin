@@ -1,9 +1,10 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import {
   MdPerson, MdLock, MdNotifications,
   MdEdit, MdSave, MdVisibility, MdVisibilityOff,
-  MdCheckCircle, MdCamera,
+  MdCheckCircle, MdCamera, MdPushPin,
 } from 'react-icons/md'
+import { pushService } from '../services/pushService'
 import './Settings.css'
 
 type Tab = 'profile' | 'password' | 'notifications'
@@ -28,7 +29,56 @@ export default function Settings() {
   const [activeTab, setActiveTab]   = useState<Tab>('profile')
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null)
 
-  // Profile state
+  // ── Push notification state ──────────────────────────────────────────
+  const [pushSubscribed, setPushSubscribed] = useState(false)
+  const [pushLoading, setPushLoading] = useState(false)
+  const [pushError, setPushError] = useState<string | null>(null)
+
+  // ── Check push subscription status on mount ─────────────────────────
+  useEffect(() => {
+    checkPushStatus()
+  }, [])
+
+  const checkPushStatus = async () => {
+    try {
+      const subscribed = await pushService.isSubscribed()
+      setPushSubscribed(subscribed)
+    } catch (error) {
+      console.error('Error checking push status:', error)
+    }
+  }
+
+  // ── Toggle push subscription ────────────────────────────────────────
+  const togglePushSubscription = async () => {
+    setPushLoading(true)
+    setPushError(null)
+    try {
+      if (pushSubscribed) {
+        // Unsubscribe
+        const success = await pushService.unsubscribe()
+        if (success) {
+          setPushSubscribed(false)
+        } else {
+          setPushError('Failed to unsubscribe from push notifications')
+        }
+      } else {
+        // Subscribe
+        const success = await pushService.subscribe()
+        if (success) {
+          setPushSubscribed(true)
+        } else {
+          setPushError('Failed to subscribe to push notifications. Please check your browser settings.')
+        }
+      }
+    } catch (error) {
+      console.error('Push toggle error:', error)
+      setPushError('Something went wrong. Please try again.')
+    } finally {
+      setPushLoading(false)
+    }
+  }
+
+  // ── Profile state ────────────────────────────────────────────────────
   const [profile, setProfile] = useState({
     name:     'Super Admin',
     email:    'admin@agroflow.io',
@@ -41,7 +91,7 @@ export default function Settings() {
   const avatarRef = useRef<HTMLInputElement>(null)
   const [avatarPreview, setAvatarPreview]   = useState<string | null>(null)
 
-  // Password state
+  // ── Password state ───────────────────────────────────────────────────
   const [passwords, setPasswords] = useState({
     current: '', newPass: '', confirm: '',
   })
@@ -50,7 +100,7 @@ export default function Settings() {
   })
   const [passwordError, setPasswordError] = useState('')
 
-  // Notifications state
+  // ── Notifications state ─────────────────────────────────────────────
   const [notifs, setNotifs] = useState<NotifPref[]>(initialNotifs)
 
   function showSuccess(key: string) {
@@ -58,7 +108,7 @@ export default function Settings() {
     setTimeout(() => setSaveSuccess(null), 3000)
   }
 
-  // ── Profile handlers ──────────────────────────
+  // ── Profile handlers ────────────────────────────────────────────────
   function handleAvatarChange(file: File | null) {
     if (!file) return
     setAvatarPreview(URL.createObjectURL(file))
@@ -76,7 +126,7 @@ export default function Settings() {
     setProfileEditing(false)
   }
 
-  // ── Password handlers ─────────────────────────
+  // ── Password handlers ───────────────────────────────────────────────
   function handlePasswordSave() {
     setPasswordError('')
     if (!passwords.current)          return setPasswordError('Enter your current password')
@@ -86,7 +136,7 @@ export default function Settings() {
     showSuccess('password')
   }
 
-  // ── Notification handlers ─────────────────────
+  // ── Notification handlers ───────────────────────────────────────────
   function toggleNotif(id: string) {
     setNotifs(prev => prev.map(n => n.id === id ? { ...n, enabled: !n.enabled } : n))
   }
@@ -383,7 +433,7 @@ export default function Settings() {
             </div>
           )}
 
-          {/* ── Notifications Tab ─────────────── */}
+          {/* ── Notifications Tab ────────────────────────────────────── */}
           {activeTab === 'notifications' && (
             <div className="settings-section">
               <div className="settings-section-header">
@@ -393,6 +443,35 @@ export default function Settings() {
                 </div>
               </div>
 
+              {/* ── Push Notification Toggle ────────────────────────────── */}
+              <div className="notif-item push-toggle">
+                <div className="notif-item-text">
+                  <p className="notif-item-label">
+                    <MdPushPin size={18} style={{ marginRight: 6, verticalAlign: 'middle' }} />
+                    Push Notifications
+                  </p>
+                  <p className="notif-item-desc">
+                    {pushSubscribed 
+                      ? 'You will receive real-time push notifications on your device' 
+                      : 'Enable push notifications to get instant alerts on your phone'}
+                  </p>
+                  {pushError && (
+                    <p className="push-error">{pushError}</p>
+                  )}
+                </div>
+                <button
+                  className={`toggle-switch${pushSubscribed ? ' on' : ''}`}
+                  onClick={togglePushSubscription}
+                  disabled={pushLoading}
+                  aria-label="Toggle push notifications"
+                >
+                  <span className="toggle-knob" />
+                </button>
+              </div>
+
+              <div className="notif-divider" />
+
+              {/* ── Notification Preferences ────────────────────────────── */}
               <div className="notif-list">
                 {notifs.map(n => (
                   <div key={n.id} className="notif-item">
