@@ -5,6 +5,7 @@ import {
   MdCheckCircle, MdCamera, MdPushPin,
 } from 'react-icons/md'
 import { pushService } from '../services/pushService'
+import { useToast } from '../context/ToastContext'
 import './Settings.css'
 
 type Tab = 'profile' | 'password' | 'notifications'
@@ -16,16 +17,17 @@ interface NotifPref {
   enabled: boolean
 }
 
-const initialNotifs: NotifPref[] = [
+const defaultNotifs: NotifPref[] = [
   { id: 'critical_alerts',   label: 'Critical Alerts',       description: 'Get notified immediately when a critical farm alert is raised',      enabled: true  },
   { id: 'warning_alerts',    label: 'Warning Alerts',        description: 'Receive warnings about NDVI drops, irrigation overdue and pest risk', enabled: true  },
   { id: 'new_farmers',       label: 'New Farmer Signups',    description: 'Be notified when a new farmer registers on the platform',            enabled: true  },
-  { id: 'new_users',         label: 'New User Registrations',description: 'Get notified when any new buyer or seller joins AgroFlow+',          enabled: false },
-  { id: 'resolved_alerts',   label: 'Resolved Alerts',       description: 'Receive a summary when alerts are marked as resolved',               enabled: false },
+  { id: 'new_users',         label: 'New User Registrations',description: 'Get notified when any new buyer or seller joins AgroFlow+',          enabled: true  },
+  { id: 'resolved_alerts',   label: 'Resolved Alerts',       description: 'Receive a summary when alerts are marked as resolved',               enabled: true  },
   { id: 'weekly_report',     label: 'Weekly Summary Report', description: 'Receive a weekly overview of all platform activity every Monday',    enabled: true  },
 ]
 
 export default function Settings() {
+  const { addToast } = useToast()
   const [activeTab, setActiveTab]   = useState<Tab>('profile')
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null)
 
@@ -33,6 +35,20 @@ export default function Settings() {
   const [pushSubscribed, setPushSubscribed] = useState(false)
   const [pushLoading, setPushLoading] = useState(false)
   const [pushError, setPushError] = useState<string | null>(null)
+
+  // ── Load saved notification preferences ─────────────────────────────
+  const [notifs, setNotifs] = useState<NotifPref[]>(() => {
+    const saved = localStorage.getItem('agf_admin_notif_prefs')
+    if (saved) {
+      try {
+        return JSON.parse(saved)
+      } catch (e) {
+        console.error('Failed to parse saved preferences:', e)
+        return defaultNotifs
+      }
+    }
+    return defaultNotifs
+  })
 
   // ── Check push subscription status on mount ─────────────────────────
   useEffect(() => {
@@ -54,18 +70,18 @@ export default function Settings() {
     setPushError(null)
     try {
       if (pushSubscribed) {
-        // Unsubscribe
         const success = await pushService.unsubscribe()
         if (success) {
           setPushSubscribed(false)
+          addToast('Push notifications disabled', 'info')
         } else {
           setPushError('Failed to unsubscribe from push notifications')
         }
       } else {
-        // Subscribe
         const success = await pushService.subscribe()
         if (success) {
           setPushSubscribed(true)
+          addToast('Push notifications enabled successfully!', 'success')
         } else {
           setPushError('Failed to subscribe to push notifications. Please check your browser settings.')
         }
@@ -100,9 +116,6 @@ export default function Settings() {
   })
   const [passwordError, setPasswordError] = useState('')
 
-  // ── Notifications state ─────────────────────────────────────────────
-  const [notifs, setNotifs] = useState<NotifPref[]>(initialNotifs)
-
   function showSuccess(key: string) {
     setSaveSuccess(key)
     setTimeout(() => setSaveSuccess(null), 3000)
@@ -118,6 +131,7 @@ export default function Settings() {
     setProfile({ ...profileDraft, avatarUrl: avatarPreview ?? profile.avatarUrl })
     setProfileEditing(false)
     showSuccess('profile')
+    addToast('Profile updated successfully!', 'success')
   }
 
   function handleProfileCancel() {
@@ -134,6 +148,7 @@ export default function Settings() {
     if (passwords.newPass !== passwords.confirm) return setPasswordError('Passwords do not match')
     setPasswords({ current: '', newPass: '', confirm: '' })
     showSuccess('password')
+    addToast('Password changed successfully!', 'success')
   }
 
   // ── Notification handlers ───────────────────────────────────────────
@@ -142,7 +157,9 @@ export default function Settings() {
   }
 
   function handleNotifSave() {
+    localStorage.setItem('agf_admin_notif_prefs', JSON.stringify(notifs))
     showSuccess('notifications')
+    addToast('Notification preferences saved successfully!', 'success')
   }
 
   const tabs: { key: Tab; label: string; icon: React.ReactNode }[] = [
