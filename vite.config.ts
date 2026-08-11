@@ -8,7 +8,11 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      // This tells the plugin to look for files in the 'public' directory
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
+      // Explicitly point to your custom service worker file
+      srcDir: 'public',
+      filename: 'push-sw.js',
       manifest: {
         name: 'AgroFlow+ Admin',
         short_name: 'AgroFlow Admin',
@@ -77,6 +81,7 @@ export default defineConfig({
         ]
       },
       workbox: {
+        // Ensure the custom service worker file is included in the build
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
         runtimeCaching: [
           {
