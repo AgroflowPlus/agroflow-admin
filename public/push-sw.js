@@ -1,40 +1,4 @@
-// Push notification service worker for Admin Dashboard with localStorage storage
 
-// ── Store notification in localStorage ──────────────────────────────
-function storeNotification(notification) {
-  try {
-    // Get existing notifications from localStorage
-    const stored = localStorage.getItem('agf_admin_notifications');
-    let notifications = stored ? JSON.parse(stored) : [];
-    
-    // Add new notification
-    notifications.unshift({
-      id: notification.id || Date.now().toString(),
-      title: notification.title || 'AgroFlow+ Admin',
-      body: notification.body || 'You have a new notification',
-      timestamp: notification.timestamp || Date.now(),
-      read: false,
-      data: notification.data || {}
-    });
-    
-    // Keep only last 100 notifications
-    if (notifications.length > 100) {
-      notifications = notifications.slice(0, 100);
-    }
-    
-    // Save back to localStorage
-    localStorage.setItem('agf_admin_notifications', JSON.stringify(notifications));
-    
-    // Dispatch a custom event so the app can react
-    window.dispatchEvent(new CustomEvent('notification-stored', {
-      detail: { notification }
-    }));
-    
-    console.log('[Push SW Admin] Notification stored:', notification.title);
-  } catch (error) {
-    console.error('[Push SW Admin] Failed to store notification:', error);
-  }
-}
 
 // ── Send notification to all open windows ──────────────────────────
 function sendToClients(notification) {
@@ -82,10 +46,7 @@ self.addEventListener('push', (event) => {
   
   event.waitUntil(
     Promise.all([
-      // Store in localStorage
-      storeNotification(notification),
-      
-      // Send to all open windows
+      // Send to all open windows (this stores in localStorage on the client side)
       sendToClients(notification),
       
       // Show system notification
@@ -140,49 +101,14 @@ self.addEventListener('notificationclick', (event) => {
 });
 
 // ── Message handler for getting stored notifications ──────────────
+// Note: This is for communication with the client, not for storing
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'GET_NOTIFICATIONS') {
-    try {
-      const stored = localStorage.getItem('agf_admin_notifications');
-      const notifications = stored ? JSON.parse(stored) : [];
-      event.ports[0].postMessage({ notifications });
-    } catch (error) {
-      console.error('[Push SW Admin] Failed to get notifications:', error);
-      event.ports[0].postMessage({ notifications: [], error: error.message });
-    }
-  }
-  
-  if (event.data && event.data.type === 'MARK_NOTIFICATION_READ') {
-    try {
-      const { id } = event.data;
-      const stored = localStorage.getItem('agf_admin_notifications');
-      let notifications = stored ? JSON.parse(stored) : [];
-      
-      notifications = notifications.map(n => 
-        n.id === id ? { ...n, read: true } : n
-      );
-      
-      localStorage.setItem('agf_admin_notifications', JSON.stringify(notifications));
-      event.ports[0].postMessage({ success: true });
-    } catch (error) {
-      console.error('[Push SW Admin] Failed to mark notification as read:', error);
-      event.ports[0].postMessage({ success: false, error: error.message });
-    }
-  }
-  
-  if (event.data && event.data.type === 'MARK_ALL_READ') {
-    try {
-      const stored = localStorage.getItem('agf_admin_notifications');
-      let notifications = stored ? JSON.parse(stored) : [];
-      
-      notifications = notifications.map(n => ({ ...n, read: true }));
-      
-      localStorage.setItem('agf_admin_notifications', JSON.stringify(notifications));
-      event.ports[0].postMessage({ success: true });
-    } catch (error) {
-      console.error('[Push SW Admin] Failed to mark all as read:', error);
-      event.ports[0].postMessage({ success: false, error: error.message });
-    }
+    // The client will handle localStorage, we just forward the request
+    event.ports[0].postMessage({ 
+      notifications: [], 
+      message: 'Client should manage localStorage' 
+    });
   }
 });
 
