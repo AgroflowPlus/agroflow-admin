@@ -15,7 +15,7 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array<ArrayBuffer> {
 }
 
 export const pushService = {
-  // ── Subscribe to push notifications ──────────────────────────────
+  // ── Subscribe to push notifications ─────
   async subscribe(): Promise<boolean> {
     try {
       if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
