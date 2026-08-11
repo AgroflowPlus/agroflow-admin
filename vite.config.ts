@@ -7,14 +7,28 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      strategies: 'injectManifest', 
+      // ── Use custom service worker ──────────────────────────────
+      strategies: 'injectManifest',
       srcDir: 'public',
       filename: 'push-sw.js',
+      
+      // ── Inject manifest configuration ──────────────────────────
       injectManifest: {
         injectionPoint: undefined,
       },
+      
+      // ── Registration settings ──────────────────────────────────
       registerType: 'autoUpdate',
+      devOptions: {
+        enabled: process.env.NODE_ENV === 'development',
+        type: 'module',
+        navigateFallback: 'index.html',
+      },
+      
+      // ── Static assets ──────────────────────────────────────────
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
+      
+      // ── PWA Manifest ────────────────────────────────────────────
       manifest: {
         name: 'AgroFlow+ Admin',
         short_name: 'AgroFlow Admin',
@@ -25,6 +39,7 @@ export default defineConfig({
         orientation: 'portrait',
         scope: '/',
         start_url: '/',
+        categories: ['business', 'productivity'],
         icons: [
           {
             src: 'icons/icon-72x72.png',
@@ -82,8 +97,9 @@ export default defineConfig({
           }
         ]
       },
+      
+      // ── Workbox configuration ──────────────────────────────────
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -93,6 +109,9 @@ export default defineConfig({
               expiration: {
                 maxEntries: 10,
                 maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
               }
             }
           },
@@ -104,11 +123,62 @@ export default defineConfig({
               expiration: {
                 maxEntries: 10,
                 maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          {
+            urlPattern: /^https:\/\/ai-farmer-platform-backend-code\.onrender\.com\/api\/.*/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'api-cache',
+              networkTimeoutSeconds: 10,
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 // 1 hour
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
               }
             }
           }
-        ]
+        ],
+        navigateFallback: 'index.html',
+        navigateFallbackDenylist: [/^\/_/, /\/api\//],
       }
     })
-  ]
+  ],
+
+  // ── Build optimization ──────────────────────────────────────────
+  build: {
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: (id) => {
+          if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
+            return 'react-vendor'
+          }
+          if (id.includes('react-icons')) {
+            return 'icon-vendor'
+          }
+        }
+      }
+    },
+    chunkSizeWarningLimit: 1000,
+  },
+
+  // ── Server configuration ──────────────────────────────────────
+  server: {
+    port: 5173,
+    strictPort: false,
+    open: true,
+  },
+
+  // ── Preview configuration ─────────────────────────────────────
+  preview: {
+    port: 4173,
+    strictPort: false,
+  },
 })
