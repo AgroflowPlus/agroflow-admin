@@ -5,6 +5,27 @@ import { MdEmail, MdLock, MdVisibility, MdVisibilityOff } from 'react-icons/md'
 import { authAPI } from '../services/api'
 import './Login.css'
 
+// ── User-friendly error messages ──────────────────────────
+function getUserFriendlyError(error: unknown): string {
+  // Network errors
+  if (error instanceof TypeError && error.message === 'Failed to fetch') {
+    return 'Unable to connect. Please check your internet connection.'
+  }
+  
+  // Network errors (alternative)
+  if (error instanceof Error && error.message.includes('NetworkError')) {
+    return 'Connection lost. Please check your network and try again.'
+  }
+  
+  // If it's a custom error from the API, use its message
+  if (error instanceof Error && error.message && !error.message.includes('fetch')) {
+    return error.message
+  }
+  
+  // All other errors
+  return 'Something went wrong. Please try again.'
+}
+
 export default function Login() {
   const navigate                = useNavigate()
   const [email, setEmail]       = useState('')
@@ -24,12 +45,12 @@ export default function Login() {
       const data = await authAPI.login(email, password)
       if (data.user.role !== 'admin') {
         authAPI.logout()
-        setError('Access denied — admin accounts only')
+        setError('Access denied. Admin accounts only.')
         return
       }
       navigate('/dashboard')
-    } catch (err: any) {
-      setError(err.message || 'Login failed')
+    } catch (err: unknown) {
+      setError(getUserFriendlyError(err))
     } finally {
       setLoading(false)
     }
