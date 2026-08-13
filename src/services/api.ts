@@ -26,7 +26,7 @@ export function removeUser(): void {
   localStorage.removeItem('agroflow_user')
 }
 
-// ── Base fetch with auth header ───────────────────
+// ── Base fetch with auth header and timeout ───────────────────
 async function apiFetch(
   endpoint: string,
   options: RequestInit = {}
@@ -42,30 +42,65 @@ async function apiFetch(
     headers['Authorization'] = `Bearer ${token}`
   }
 
-  const response = await fetch(`${BASE_URL}${endpoint}`, {
-    ...options,
-    headers,
-  })
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 15000) // 15 second timeout
 
-  const data = await response.json()
+  try {
+    const response = await fetch(`${BASE_URL}${endpoint}`, {
+      ...options,
+      headers,
+      signal: controller.signal,
+    })
+    clearTimeout(timeout)
 
-  if (!response.ok) {
-    throw new Error(data.error || 'Something went wrong')
+    const data = await response.json()
+
+    if (!response.ok) {
+      throw new Error(data.error || data.message || 'Something went wrong')
+    }
+
+    return data
+  } catch (error: any) {
+    clearTimeout(timeout)
+    
+    // Handle timeout
+    if (error.name === 'AbortError') {
+      throw new Error('Something went wrong. Please try again.')
+    }
+    
+    // Handle network errors
+    if (!navigator.onLine || error.message === 'Failed to fetch' || error.message === 'NetworkError') {
+      throw new Error('No internet connection. Please check your network and try again.')
+    }
+    
+    // Re-throw if already user-friendly
+    if (error.message && !error.message.includes('fetch') && !error.message.includes('NetworkError')) {
+      throw error
+    }
+    
+    throw new Error('Something went wrong. Please try again.')
   }
-
-  return data
 }
 
 // ── Auth ──────────────────────────────────────────
 export const authAPI = {
   login: async (email: string, password: string) => {
-    const data = await apiFetch('/auth/login', {
-      method: 'POST',
-      body:   JSON.stringify({ email, password }),
-    })
-    setToken(data.token)
-    setUser(data.user)
-    return data
+    try {
+      const data = await apiFetch('/auth/login', {
+        method: 'POST',
+        body:   JSON.stringify({ email, password }),
+      })
+      setToken(data.token)
+      setUser(data.user)
+      return data
+    } catch (error: any) {
+      // Check if it's a network error
+      if (error.message === 'No internet connection. Please check your network and try again.') {
+        throw error
+      }
+      // Re-throw other errors
+      throw error
+    }
   },
 
   logout: () => {
@@ -158,15 +193,31 @@ export const contentAPI = {
 
   upload: (formData: FormData) => {
     const token = getToken()
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 15000)
+
     return fetch(`${BASE_URL}/content/upload`, {
-      method:  'POST',
+      method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
-      body:    formData,
-    }).then(async res => {
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Upload failed')
-      return data
+      body: formData,
+      signal: controller.signal,
     })
+      .then(async res => {
+        clearTimeout(timeout)
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.error || 'Upload failed')
+        return data
+      })
+      .catch((error: any) => {
+        clearTimeout(timeout)
+        if (error.name === 'AbortError') {
+          throw new Error('Something went wrong. Please try again.')
+        }
+        if (!navigator.onLine || error.message === 'Failed to fetch') {
+          throw new Error('No internet connection. Please check your network and try again.')
+        }
+        throw error
+      })
   },
 }
 

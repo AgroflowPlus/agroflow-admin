@@ -10,10 +10,23 @@ async function apiFetch(url: string, options: RequestInit = {}): Promise<Respons
     return res;
   } catch (err: any) {
     clearTimeout(timeout);
+    
+    // Handle timeout
     if (err.name === 'AbortError') {
-      throw new Error('Request timed out. Please try again.');
+      throw new Error('Something went wrong. Please try again.');
     }
-    throw err;
+    
+    // Handle network errors
+    if (!navigator.onLine || err.message === 'Failed to fetch' || err.message === 'NetworkError') {
+      throw new Error('No internet connection. Please check your network and try again.');
+    }
+    
+    // Re-throw if already user-friendly
+    if (err.message && !err.message.includes('fetch') && !err.message.includes('NetworkError')) {
+      throw err;
+    }
+    
+    throw new Error('Something went wrong. Please try again.');
   }
 }
 
@@ -51,6 +64,17 @@ export const sellerService = {
       }
       return { success: true };
     } catch (error: any) {
+      console.error('Approve seller error:', error);
+      
+      // Check for network errors
+      if (!navigator.onLine || error.message === 'No internet connection. Please check your network and try again.') {
+        return { success: false, error: 'No internet connection. Please check your network and try again.' };
+      }
+      
+      if (error.message === 'Something went wrong. Please try again.') {
+        return { success: false, error: error.message };
+      }
+      
       return { success: false, error: error.message || 'Failed to approve seller' };
     }
   },
@@ -72,6 +96,17 @@ export const sellerService = {
       }
       return { success: true };
     } catch (error: any) {
+      console.error('Reject seller error:', error);
+      
+      // Check for network errors
+      if (!navigator.onLine || error.message === 'No internet connection. Please check your network and try again.') {
+        return { success: false, error: 'No internet connection. Please check your network and try again.' };
+      }
+      
+      if (error.message === 'Something went wrong. Please try again.') {
+        return { success: false, error: error.message };
+      }
+      
       return { success: false, error: error.message || 'Failed to reject seller' };
     }
   },
