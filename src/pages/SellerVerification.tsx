@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   RiCheckLine, 
   RiCloseLine, 
@@ -44,6 +45,7 @@ export default function SellerVerification() {
   const [selectedSeller, setSelectedSeller] = useState<PendingSeller | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
   const [showRejectModal, setShowRejectModal] = useState(false);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   // ── Load pending sellers ──────────────────────────────────────────
   const loadPendingSellers = async () => {
@@ -205,8 +207,8 @@ export default function SellerVerification() {
         </div>
       )}
 
-      {/* ── View Details Modal ────────────────────────────────────── */}
-      {selectedSeller && !showRejectModal && (
+      {/* ── View Details Modal (Portal) ──────────────────────────────── */}
+      {selectedSeller && !showRejectModal && createPortal(
         <div className={styles.modalOverlay} onClick={() => setSelectedSeller(null)}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
             <button className={styles.closeBtn} onClick={() => setSelectedSeller(null)}>
@@ -262,6 +264,8 @@ export default function SellerVerification() {
                       src={selectedSeller.selfieUrl} 
                       alt="Seller selfie" 
                       className={styles.selfieImage}
+                      onClick={() => setPreviewImage(selectedSeller.selfieUrl)}
+                      style={{ cursor: 'zoom-in' }}
                     />
                   </div>
                 </div>
@@ -285,11 +289,12 @@ export default function SellerVerification() {
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
-      {/* ── Rejection Modal ────────────────────────────────────────── */}
-      {showRejectModal && selectedSeller && (
+      {/* ── Rejection Modal (Portal) ──────────────────────────────────── */}
+      {showRejectModal && selectedSeller && createPortal(
         <div className={styles.modalOverlay} onClick={() => setShowRejectModal(false)}>
           <div className={styles.modal} onClick={(e) => e.stopPropagation()} style={{ maxWidth: 450 }}>
             <button className={styles.closeBtn} onClick={() => setShowRejectModal(false)}>
@@ -329,7 +334,26 @@ export default function SellerVerification() {
               </LoadingButton>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
+      )}
+
+      {/* ── Image Lightbox (Portal) ────────────────────────────────────── */}
+      {previewImage && createPortal(
+        <div 
+          className={styles.imageLightbox} 
+          onClick={() => setPreviewImage(null)}
+        >
+          <button 
+            className={styles.lightboxCloseBtn}
+            onClick={() => setPreviewImage(null)}
+            aria-label="Close preview"
+          >
+            ✕
+          </button>
+          <img src={previewImage} alt="Full selfie preview" />
+        </div>,
+        document.body
       )}
     </div>
   );

@@ -148,3 +148,8 @@ h5 { font-size: 15px; font-weight: 600; line-height: 1.5; }
   .users-summary         { grid-template-columns: 1fr; }
   main                   { padding: 16px !important; padding-bottom: 100px !important; }
 }
+
+@keyframes toastSlideIn {
+  from { opacity: 0; transform: translateY(-12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
